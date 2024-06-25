@@ -2,4 +2,4 @@
 FROM nginx:latest
 
 # Copy static files to the nginx directory
-COPY static /usr/share/nginx/page1.html
+COPY static /usr/share/nginx/html
