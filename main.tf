@@ -57,13 +57,12 @@ resource "aws_security_group" "ecs" {
 }
 
 resource "aws_iam_role" "ecs_task_execution_role" {
-  name = "ecsTaskExecutionRole"
-
+  name               = "ecsTaskExecutionRole"
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [{
-      Action = "sts:AssumeRole",
-      Effect = "Allow",
+      Action    = "sts:AssumeRole",
+      Effect    = "Allow",
       Principal = {
         Service = "ecs-tasks.amazonaws.com"
       }
@@ -86,7 +85,6 @@ resource "aws_ecs_task_definition" "web" {
   cpu                      = "256"
   memory                   = "512"
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
-
   container_definitions = jsonencode([{
     name      = "web"
     image     = "471112982662.dkr.ecr.us-east-1.amazonaws.com/my-web-app:latest"
@@ -97,65 +95,3 @@ resource "aws_ecs_task_definition" "web" {
     }]
   }])
 }
-
-resource "aws_ecs_service" "web" {
-  name            = "web"
-  cluster         = aws_ecs_cluster.main.id
-  task_definition = aws_ecs_task_definition.web.arn
-  launch_type     = "FARGATE"
-  desired_count   = 2
-
-  network_configuration {
-    subnets         = aws_subnet.public[*].id
-    security_groups = [aws_security_group.ecs.id]
-  }
-
-  load_balancer {
-    target_group_arn = aws_lb_target_group.web.arn
-    container_name   = "web"
-    container_port   = 80
-  }
-}
-
-resource "aws_lb" "web" {
-  name               = "web-alb"
-  internal           = false
-  load_balancer_type = "application"
-  security_groups    = [aws_security_group.ecs.id]
-  subnets            = aws_subnet.public[*].id
-}
-
-resource "aws_lb_target_group" "web" {
-  name     = "web-tg"
-  port     = 80
-  protocol = "HTTP"
-  vpc_id   = aws_vpc.main.id
-}
-
-resource "aws_lb_listener" "web" {
-  load_balancer_arn = aws_lb.web.arn
-  port              = "80"
-  protocol          = "HTTP"
-
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.web.arn
-  }
-}
-
-resource "aws_route53_zone" "main" {
-  name = "mydomain.com"
-}
-
-resource "aws_route53_record" "web" {
-  zone_id = aws_route53_zone.main.zone_id
-  name    = "app.mydomain.com"
-  type    = "A"
-
-  alias {
-    name                   = aws_lb.web.dns_name
-    zone_id                = aws_lb.web.zone_id
-    evaluate_target_health = true
-  }
-}
-
