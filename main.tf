@@ -87,7 +87,7 @@ resource "aws_ecs_task_definition" "web" {
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
   container_definitions = jsonencode([{
     name      = "web"
-    image     = "471112982662.dkr.ecr.us-east-1.amazonaws.com/my-web-app:latest"
+    image     = "111.dkr.ecr.us-east-1.amazonaws.com/my-web-app:latest"
     essential = true
     portMappings = [{
       containerPort = 80
