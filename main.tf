@@ -56,8 +56,6 @@ resource "aws_security_group" "ecs" {
   }
 }
 
-
-
 resource "aws_ecs_cluster" "main" {
   name = "my-cluster"
 }
