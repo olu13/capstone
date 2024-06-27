@@ -106,7 +106,7 @@ resource "aws_lb_listener" "web_app_listener" {
 }
 
 resource "aws_route53_zone" "main" {
-  name = "example.com"
+  name = "developerolu.com"
 }
 
 resource "aws_route53_record" "web_app_record" {
