@@ -40,17 +40,17 @@ resource "aws_lb" "my_load_balancer" {
   subnets            = ["subnet-08b974908240191aa", "subnet-0a52736d51a6edaf5", "subnet-0981d8102bbdb520f", "subnet-0f0bb9795e0215303", "subnet-02c28d9ea478551a8", "subnet-02e8d4b46a4f7d51f"]
 }
 resource "aws_lb_target_group" "my_target_group" {
-  name     = "myTG"
+  name     = "my-target-group"
   port     = 80
   protocol = "HTTP"
   vpc_id = "vpc-080ae127d0fdadb00"
 }
 resource "aws_lb_listener" "my_listener" {
-  load_balancer_arn = "arn:aws:elasticloadbalancing:us-east-1:471112982662:loadbalancer/app/myALB/277383df4188aa89"
+  load_balancer_arn = aws_lb.my_load_balancer.arn
   port              = "80"
   protocol          = "HTTP"
   default_action {
-    target_group_arn = "arn:aws:elasticloadbalancing:us-east-1:471112982662:targetgroup/myTG/68ca8c0cde2befa2"
+    target_group_arn = aws_lb_target_group.my_target_group.arn
     type             = "forward"
   }
 }
