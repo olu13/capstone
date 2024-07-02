@@ -46,16 +46,16 @@ resource "aws_lb_target_group" "my_target_group" {
   vpc_id = "vpc-080ae127d0fdadb00"
 }
 resource "aws_lb_listener" "my_listener" {
-  load_balancer_arn = arn:aws:elasticloadbalancing:us-east-1:471112982662:loadbalancer/app/myALB/277383df4188aa89
+  load_balancer_arn = "arn:aws:elasticloadbalancing:us-east-1:471112982662:loadbalancer/app/myALB/277383df4188aa89"
   port              = "80"
   protocol          = "HTTP"
   default_action {
-    target_group_arn = arn:aws:elasticloadbalancing:us-east-1:471112982662:targetgroup/myTG/68ca8c0cde2befa2
+    target_group_arn = "arn:aws:elasticloadbalancing:us-east-1:471112982662:targetgroup/myTG/68ca8c0cde2befa2"
     type             = "forward"
   }
 }
 resource "aws_lb_target_group_attachment" "ecs_attachments" {
-  target_group_arn = arn:aws:elasticloadbalancing:us-east-1:471112982662:targetgroup/myTG/68ca8c0cde2befa2
+  target_group_arn = "arn:aws:elasticloadbalancing:us-east-1:471112982662:targetgroup/myTG/68ca8c0cde2befa2"
   target_id        = "i-01d71f46920373e3e" // Replace with your EC2 instance ID
 }
 
