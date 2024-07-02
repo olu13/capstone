@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Static Pages</title>
+</head>
+<body>
+
+<!-- First Page -->
+<div id="page1" style="display: block;">
+    <h1>This is Capstone project page 1</h1>
+    <p>Learning to be a good Cloud Engineer.</p>
+    <a href="#" onclick="showPage('page2')">Go to Page 2</a>
+</div>
+
+<!-- Second Page -->
+<div id="page2" style="display: none;">
+    <h1>This is page 2 of the capstone project</h1>
+    <p>I am making progress.</p>
+    <a href="#" onclick="showPage('page1')">Go to Page 1</a>
+</div>
+
+<script>
+    function showPage(pageId) {
+        var pages = document.querySelectorAll('[id^="page"]');
+        for (var i = 0; i < pages.length; i++) {
+            pages[i].style.display = 'none';
+        }
+        document.getElementById(pageId).style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
