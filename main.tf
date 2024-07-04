@@ -3,11 +3,11 @@ provider "aws" {
 }
 
 resource "aws_ecr_repository" "web_app" {
-  name = "my-web-app"
+  name = "my-web-app1"
 }
 
 resource "aws_iam_role" "ecs_task_execution_role" {
-  name = "ecsTaskExecutionRole"
+  name = "ecsTaskExecutionRole1"
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -82,7 +82,7 @@ resource "aws_lb" "web_app_lb" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = ["sg-0d3488dcfb121757f"]
-  subnets            = ["subnet-0c2331bf8c7bba1d2", "subnet-0fc8a097b280af02c"]
+  subnets            = ["subnet-0a52736d51a6edaf5", "subnet-08b974908240191aa"]
 
   enable_deletion_protection = true
 }
