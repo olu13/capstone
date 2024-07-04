@@ -38,7 +38,7 @@ resource "aws_ecs_service" "my_service" {
 }
 
 // Ensure instances are registered to the cluster
-resource "aws_ecs_instance" "example" {
+resource "aws_ecs_instance" "capstone" {
   ami             = "ami-06c68f701d8090592"
   instance_type   = "t2.micro"
   cluster         = aws_ecs_cluster.my_cluster.id
