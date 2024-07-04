@@ -96,7 +96,7 @@ resource "aws_lb_target_group_attachment" "ecs_attachments" {
   target_id        = aws_ecs_service.my_service.id
 }
 
-/* Uncomment this section if you want to configure Route 53 record for your web app
+// Uncomment this section if you want to configure Route 53 record for your web app
 resource "aws_route53_record" "my-webapp-dns" {
   depends_on = [aws_lb.my_load_balancer]  # Wait for the load balancer to be created
   zone_id    = "Z0535352AWZD8KPMMKDN"
@@ -105,4 +105,4 @@ resource "aws_route53_record" "my-webapp-dns" {
   ttl        = "300"
   records    = [aws_lb.my_load_balancer.dns_name] # Use the DNS name created by the LB
 }
-*/
+
