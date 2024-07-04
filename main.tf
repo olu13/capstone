@@ -81,7 +81,7 @@ resource "aws_lb" "web_app_lb" {
   name               = "web-app-lb"
   internal           = false
   load_balancer_type = "application"
-  security_groups    = ["sg-0d3488dcfb121757f"]
+  security_groups    = ["sg-02b5a36db4af1d6d3"]
   subnets            = ["subnet-0a52736d51a6edaf5", "subnet-08b974908240191aa"]
 
   enable_deletion_protection = true
