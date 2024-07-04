@@ -47,13 +47,6 @@ resource "aws_ecs_instance" "example" {
   subnet_id       = "subnet-0a52736d51a6edaf5"
 }
 
-// Deploy ECS task definition to the cluster
-resource "aws_ecs_task_definition" "my_task_definition" {
-  family                = "my-task-family"
-  container_definitions = <<-EOT
-    [
-      {
-
 // Load Balancer
 resource "aws_lb" "my_load_balancer" {
   name               = "my-load-balancer"
