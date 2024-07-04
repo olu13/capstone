@@ -4,9 +4,6 @@ provider "aws" {
 
 resource "aws_ecs_cluster" "my_cluster" {
   name = "my-ecs-cluster"
-// Ensure the service waits for instances to be available before launching tasks
-  deployment_maximum_percent = 100
-  deployment_minimum_healthy_percent = 0
 }
 
 // Task Definition
@@ -69,7 +66,7 @@ resource "aws_lb" "my_load_balancer" {
     "subnet-0981d8102bbdb520f",
     "subnet-0f0bb9795e0215303",
     "subnet-02c28d9ea478551a8",
-    "subnet-02e8d4b46a4f7d51f",
+    "subnet-02e8d4b46a4f7d51f"
   ]
 }
 
