@@ -41,7 +41,6 @@ resource "aws_ecs_service" "my_service" {
 resource "aws_instance" "capstone" {
   ami             = "ami-06c68f701d8090592"
   instance_type   = "t2.micro"
-  cluster         = aws_ecs_cluster.my_cluster.id
   key_name        = "my-key-pair"
   security_groups = ["sg-002f5802f23c919f3"]
   subnet_id       = "subnet-0a52736d51a6edaf5"
