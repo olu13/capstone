@@ -4,6 +4,9 @@ provider "aws" {
 
 resource "aws_ecs_cluster" "my_cluster" {
   name = "my-ecs-cluster"
+// Ensure the service waits for instances to be available before launching tasks
+  deployment_maximum_percent = 100
+  deployment_minimum_healthy_percent = 0
 }
 
 // Task Definition
@@ -37,9 +40,6 @@ resource "aws_ecs_service" "my_service" {
   launch_type     = "EC2"
 }
 
-// Ensure the service waits for instances to be available before launching tasks
-deployment_maximum_percent = 100
-deployment_minimum_healthy_percent = 0
 // Ensure instances are registered to the cluster
 resource "aws_ecs_instance" "example" {
   ami             = "ami-06c68f701d8090592"
@@ -48,12 +48,6 @@ resource "aws_ecs_instance" "example" {
   key_name        = "my-key-pair"
   security_groups = ["sg-002f5802f23c919f3"]
   subnet_id       = "subnet-0a52736d51a6edaf5"
-}
-
-// Attach instances to ECS cluster
-resource "aws_ecs_container_instance" "capstone" {
-  cluster = aws_ecs_cluster.my_cluster.id
-  instance_arn = "arn:aws:ec2:us-east-1:471112982662:instance/i-00d19ad627fa1f90d"
 }
 
 // Deploy ECS task definition to the cluster
