@@ -2,177 +2,90 @@ provider "aws" {
   region = "us-east-1"
 }
 
-resource "aws_ecr_repository" "web_app" {
-  name = "my-web-app1"
+resource "aws_ecs_cluster" "my_cluster" {
+  name = "my-ecs-cluster"
 }
 
-resource "aws_iam_role" "ecs_task_execution_role" {
-  name = "ecsTaskExecutionRole1"
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "ecs-tasks.amazonaws.com"
-      },
-      "Action": "sts:AssumeRole"
-    }
-  ]
-}
-EOF
-}
-
-resource "aws_iam_role_policy_attachment" "ecs_task_execution_policy" {
-  role       = aws_iam_role.ecs_task_execution_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
-}
-
-resource "aws_ecs_cluster" "web_app_cluster" {
-  name = "web-app-cluster"
+// Task Definition
+resource "aws_ecs_task_definition" "my_task_definition" {
+  family                = "my-task-family"
+  container_definitions = <<-EOT
+    [
+      {
+        "name": "my-web-app",
+        "image": "471112982662.dkr.ecr.us-east-1.amazonaws.com/my-web-app:latest",
+        "cpu": 256,
+        "memory": 512,
+        "essential": true,
+        "portMappings": [
+          {
+            "containerPort": 80,
+            "hostPort": 80
+          }
+        ]
+      }
+    ]
+  EOT
 }
 
-resource "aws_ecs_task_definition" "web_app_task" {
-  family                   = "web-app-task"
-  network_mode             = "awsvpc"
-  requires_compatibilities = ["FARGATE"]
-  cpu                      = "256"
-  memory                   = "512"
-
-  execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
-
-  container_definitions = jsonencode([
-    {
-      name      = "web-app"
-      image     = "471112982662.dkr.ecr.us-east-1.amazonaws.com/my-web-app:latest"
-      essential = true
-      portMappings = [
-        {
-          containerPort = 80
-          hostPort      = 80
-        }
-      ]
-    }
-  ])
+// ECS Service
+resource "aws_ecs_service" "my_service" {
+  name            = "my-ecs-service"
+  cluster         = aws_ecs_cluster.my_cluster.id
+  task_definition = aws_ecs_task_definition.my_task_definition.arn
+  desired_count   = 1
+  launch_type     = "EC2"
 }
 
-resource "aws_ecs_service" "web_app_service" {
-  name            = "web-app-service"
-  cluster         = aws_ecs_cluster.web_app_cluster.id
-  task_definition = aws_ecs_task_definition.web_app_task.arn
-  desired_count   = 2
-  launch_type     = "FARGATE"
-
-  network_configuration {
-    subnets          = ["subnet-0c2331bf8c7bba1d2", "subnet-0fc8a097b280af02c"]
-    security_groups  = ["sg-0d3488dcfb121757f"]
-    assign_public_ip = true
-  }
-
-  load_balancer {
-    target_group_arn = aws_lb_target_group.web_app_tg.arn
-    container_name   = "web-app"
-    container_port   = 80
-  }
-}
-
-resource "aws_lb" "web_app_lb" {
-  name               = "web-app-lb"
+// Load Balancer
+resource "aws_lb" "my_load_balancer" {
+  name               = "my-load-balancer"
   internal           = false
   load_balancer_type = "application"
-  security_groups    = ["sg-02b5a36db4af1d6d3"]
-  subnets            = ["subnet-0a52736d51a6edaf5", "subnet-08b974908240191aa"]
-
-  enable_deletion_protection = true
+  security_groups    = ["sg-07a91622ffb6ac848"]
+  subnets            = [
+    "subnet-08b974908240191aa",
+    "subnet-0a52736d51a6edaf5",
+    "subnet-0981d8102bbdb520f",
+    "subnet-0f0bb9795e0215303",
+    "subnet-02c28d9ea478551a8",
+    "subnet-02e8d4b46a4f7d51f",
+  ]
 }
 
-resource "aws_lb_target_group" "web_app_tg" {
-  name     = "web-app-tg"
+// Target Group
+resource "aws_lb_target_group" "my_target_group" {
+  name     = "my-target-group"
   port     = 80
   protocol = "HTTP"
-  vpc_id   = aws_vpc.main.id
+  vpc_id   = "vpc-080ae127d0fdadb00"
 }
 
-resource "aws_lb_listener" "web_app_listener" {
-  load_balancer_arn = aws_lb.web_app_lb.arn
+// Listener
+resource "aws_lb_listener" "my_listener" {
+  load_balancer_arn = aws_lb.my_load_balancer.arn
   port              = "80"
   protocol          = "HTTP"
 
   default_action {
+    target_group_arn = aws_lb_target_group.my_target_group.arn
     type             = "forward"
-    target_group_arn = aws_lb_target_group.web_app_tg.arn
   }
 }
 
-resource "aws_route53_zone" "main" {
-  name = "www.developerolu.com"
+// ECS Task Attachment to Target Group
+resource "aws_lb_target_group_attachment" "ecs_attachments" {
+  target_group_arn = aws_lb_target_group.my_target_group.arn
+  target_id        = aws_ecs_service.my_service.id
 }
 
-resource "aws_route53_record" "web_app_record" {
-  zone_id = aws_route53_zone.main.zone_id
-  name    = "web-app"
-  type    = "A"
-
-  alias {
-    name                   = aws_lb.web_app_lb.dns_name
-    zone_id                = aws_lb.web_app_lb.zone_id
-    evaluate_target_health = true
-  }
+/* Uncomment this section if you want to configure Route 53 record for your web app
+resource "aws_route53_record" "my-webapp-dns" {
+  depends_on = [aws_lb.my_load_balancer]  # Wait for the load balancer to be created
+  zone_id    = "Z0535352AWZD8KPMMKDN"
+  name       = "www.developerolu.com"
+  type       = "CNAME"  # Use CNAME instead of A
+  ttl        = "300"
+  records    = [aws_lb.my_load_balancer.dns_name] # Use the DNS name created by the LB
 }
-
-resource "aws_vpc" "main" {
-  cidr_block = "10.0.0.0/16"
-}
-
-resource "aws_subnet" "public_a" {
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.0.1.0/24"
-  availability_zone = "us-east-1a"
-
-  map_public_ip_on_launch = true
-}
-
-resource "aws_subnet" "public_b" {
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.0.2.0/24"
-  availability_zone = "us-east-1b"
-
-  map_public_ip_on_launch = true
-}
-
-resource "aws_security_group" "web_app_sg" {
-  vpc_id = aws_vpc.main.id
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
-resource "aws_security_group" "lb_sg" {
-  vpc_id = aws_vpc.main.id
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
+*/
