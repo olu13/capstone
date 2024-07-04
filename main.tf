@@ -81,11 +81,6 @@ resource "aws_lb_listener" "my_listener" {
   }
 }
 
-// ECS Task Attachment to Target Group
-resource "aws_lb_target_group_attachment" "ecs_attachments" {
-  target_group_arn = aws_lb_target_group.my_target_group.arn
-  target_id        = "arn:aws:ecs:us-east-1:471112982662:cluster/my-ecs-cluster"
-}
 
 // Uncomment this section if you want to configure Route 53 record for your web app
 resource "aws_route53_record" "my-webapp-dns" {
