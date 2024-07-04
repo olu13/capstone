@@ -41,7 +41,6 @@ resource "aws_ecs_service" "my_service" {
 resource "aws_instance" "capstone" {
   ami             = "ami-06c68f701d8090592"
   instance_type   = "t2.micro"
-  key_name        = "my-key-pair"
   security_groups = ["sg-002f5802f23c919f3"]
   subnet_id       = "subnet-0a52736d51a6edaf5"
 }
@@ -85,7 +84,7 @@ resource "aws_lb_listener" "my_listener" {
 // ECS Task Attachment to Target Group
 resource "aws_lb_target_group_attachment" "ecs_attachments" {
   target_group_arn = aws_lb_target_group.my_target_group.arn
-  target_id        = aws_ecs_service.my_service.id
+  target_id        = "arn:aws:ecs:us-east-1:471112982662:cluster/my-ecs-cluster"
 }
 
 // Uncomment this section if you want to configure Route 53 record for your web app
